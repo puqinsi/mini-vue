@@ -17,4 +17,17 @@ describe("effect", () => {
         user.age++;
         expect(nextAge).toBe(12);
     });
+
+    it("runner", () => {
+        // effect(fn) → function (runner) → fn → return
+        let count = 10;
+        const runner = effect(() => {
+            count++;
+            return "count";
+        });
+        expect(count).toBe(11);
+        const r = runner();
+        expect(count).toBe(12);
+        expect(r).toBe("count");
+    });
 });
