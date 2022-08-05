@@ -1,5 +1,5 @@
 import { reactive } from "../reactive";
-import { effect } from "../effect";
+import { effect, stop } from "../effect";
 describe("effect", () => {
     it("happy path", () => {
         const user = reactive({
@@ -32,6 +32,10 @@ describe("effect", () => {
     });
 
     it("scheduler", () => {
+        // 1.通过 effect 的第二个参数给定一个 schedule
+        // 2.effect第一次执行，会执行 fn;
+        // 3.当响应式对象set update 不会执行 fn, 而是执行 scheduler;
+        // 4.执行runner 时，不会执行scheduler，而是执行 fn;
         let dummy;
         let run: any;
         const scheduler = jest.fn(() => {
@@ -59,5 +63,37 @@ describe("effect", () => {
         run();
         // should han run
         expect(dummy).toBe(2);
+    });
+
+    it("stop", () => {
+        let dummy;
+        const obj = reactive({ foo: 1 });
+        const runner = effect(() => {
+            dummy = obj.foo;
+        });
+
+        obj.foo = 2;
+        expect(dummy).toBe(2);
+        stop(runner);
+        obj.foo = 3;
+        expect(dummy).toBe(2);
+
+        runner();
+        expect(dummy).toBe(3);
+    });
+
+    it("onStop", () => {
+        let dummy;
+        const onStop = jest.fn();
+        const obj = reactive({ foo: 1 });
+        const runner = effect(
+            () => {
+                dummy = obj.foo;
+            },
+            { onStop },
+        );
+
+        stop(runner);
+        expect(onStop).toHaveBeenCalled();
     });
 });
