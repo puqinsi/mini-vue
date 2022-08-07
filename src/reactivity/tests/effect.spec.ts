@@ -75,7 +75,10 @@ describe("effect", () => {
         obj.foo = 2;
         expect(dummy).toBe(2);
         stop(runner);
-        obj.foo = 3;
+        // 触发 set
+        // obj.foo = 3;
+        // 触发 get set
+        obj.foo++;
         expect(dummy).toBe(2);
 
         runner();
