@@ -1,5 +1,7 @@
 import { extend } from "../shared";
 
+let activeEffect: any;
+let shouldTrack: boolean;
 class ReactiveEffect {
     private _fn: any;
     public scheduler: any;
@@ -11,8 +13,20 @@ class ReactiveEffect {
         this.scheduler = scheduler;
     }
     run() {
+        shouldTrack = false;
+        // 已 stop
+        if (!this.active) {
+            return this._fn();
+        }
+
+        // 应收集
+        shouldTrack = true;
         activeEffect = this;
-        return this._fn();
+        const res = this._fn();
+        // 重置全局变量
+        shouldTrack = false;
+
+        return res;
     }
     stop() {
         if (!this.active) return;
@@ -26,11 +40,15 @@ function cleanupEffect(effect: any) {
     effect.deps.forEach((dep: any) => {
         dep.delete(effect);
     });
+
+    effect.deps.length = 0;
 }
 
 // 收集依赖
 const targetMap = new Map();
 export function track(target: any, key: any) {
+    if (!isTracking()) return;
+
     // target => key => dep
     let depsMap = targetMap.get(target);
     if (!depsMap) {
@@ -44,10 +62,13 @@ export function track(target: any, key: any) {
         depsMap.set(key, dep);
     }
 
-    if (!activeEffect) return;
+    if (dep.has(activeEffect)) return;
     dep.add(activeEffect);
     // 每个 activeEffect 存储所有被存储的的dep，为了 stop 时找到 activeEffect 所有对应的 dep，并从中删除，再触发依赖时不会执行
     activeEffect.deps.push(dep);
+}
+function isTracking() {
+    return activeEffect !== undefined && shouldTrack;
 }
 
 // 触发依赖
@@ -63,7 +84,6 @@ export function trigger(target: any, key: any) {
     }
 }
 
-let activeEffect: any;
 export function effect(fn: any, options: any = {}) {
     const _effect = new ReactiveEffect(fn, options.scheduler);
     extend(_effect, options);
