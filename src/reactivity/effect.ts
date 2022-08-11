@@ -62,12 +62,16 @@ export function track(target: any, key: any) {
         depsMap.set(key, dep);
     }
 
+    trackEffects(dep);
+}
+
+export function trackEffects(dep: any) {
     if (dep.has(activeEffect)) return;
     dep.add(activeEffect);
     // 每个 activeEffect 存储所有被存储的的dep，为了 stop 时找到 activeEffect 所有对应的 dep，并从中删除，再触发依赖时不会执行
     activeEffect.deps.push(dep);
 }
-function isTracking() {
+export function isTracking() {
     return activeEffect !== undefined && shouldTrack;
 }
 
@@ -75,6 +79,10 @@ function isTracking() {
 export function trigger(target: any, key: any) {
     const depsMap = targetMap.get(target);
     const dep = depsMap.get(key);
+    triggerEffects(dep);
+}
+
+export function triggerEffects(dep: any) {
     for (const effect of dep) {
         if (effect.scheduler) {
             effect.scheduler();
