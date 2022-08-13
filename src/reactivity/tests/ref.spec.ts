@@ -63,6 +63,8 @@ describe("ref", () => {
     });
 
     it("proxyRefs", () => {
+        // proxyRefs 目的就是处理对象中属性是ref的数据，
+        // 利用 proxy 去 处理 get 和 set 时的操作，处理 ref 数据 解构和赋值
         const person = {
             age: ref(10),
             name: "puqinsi",

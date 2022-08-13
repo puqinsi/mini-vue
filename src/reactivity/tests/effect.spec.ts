@@ -36,6 +36,7 @@ describe("effect", () => {
         // 2.effect第一次执行，会执行 fn;
         // 3.当响应式对象set update 不会执行 fn, 而是执行 scheduler;
         // 4.执行runner 时，不会执行scheduler，而是执行 fn;
+        // 总结：为类似 computed 功能提供方案
         let dummy;
         let run: any;
         const scheduler = jest.fn(() => {
