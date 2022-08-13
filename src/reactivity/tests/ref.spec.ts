@@ -1,6 +1,6 @@
 import { effect } from "../effect";
 import { reactive } from "../reactive";
-import { isRef, ref, unRef } from "../ref";
+import { isRef, proxyRefs, ref, unRef } from "../ref";
 
 describe("ref", () => {
     it("happy path", () => {
@@ -60,5 +60,26 @@ describe("ref", () => {
         const a = ref(1);
         expect(unRef(a)).toBe(1);
         expect(unRef(1)).toBe(1);
+    });
+
+    it("proxyRefs", () => {
+        // proxyRefs 目的就是处理对象中属性是ref的数据，
+        // 利用 proxy 去 处理 get 和 set 时的操作，处理 ref 数据 解构和赋值
+        const person = {
+            age: ref(10),
+            name: "puqinsi",
+        };
+        const proxyPerson = proxyRefs(person);
+        expect(proxyPerson.age).toBe(10);
+        expect(person.age.value).toBe(10);
+        expect(person.name).toBe("puqinsi");
+
+        proxyPerson.age = 20;
+        expect(proxyPerson.age).toBe(20);
+        expect(person.age.value).toBe(20);
+
+        proxyPerson.age = ref(20);
+        expect(proxyPerson.age).toBe(20);
+        expect(person.age.value).toBe(20);
     });
 });

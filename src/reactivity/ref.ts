@@ -49,3 +49,19 @@ export function isRef(ref: any): boolean {
 export function unRef(ref: any) {
     return isRef(ref) ? ref.value : ref;
 }
+
+export function proxyRefs(objectWidthRefs: any) {
+    return new Proxy(objectWidthRefs, {
+        get(target, key) {
+            return unRef(Reflect.get(target, key));
+        },
+        set(target, key, value) {
+            if (isRef(target[key]) && !isRef(value)) {
+                // 特殊处理
+                return (target[key].value = value);
+            } else {
+                return Reflect.set(target, key, value);
+            }
+        },
+    });
+}
