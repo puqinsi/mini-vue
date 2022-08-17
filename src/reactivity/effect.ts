@@ -36,6 +36,7 @@ export class ReactiveEffect {
     }
 }
 
+// page 50: 分支切换与 cleanup
 function cleanupEffect(effect: any) {
     effect.deps.forEach((dep: any) => {
         dep.delete(effect);
