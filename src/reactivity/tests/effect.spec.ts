@@ -18,6 +18,14 @@ describe("effect", () => {
         expect(nextAge).toBe(12);
     });
 
+    it("not infinite loop", () => {
+        const user = reactive({
+            age: 1,
+        });
+        effect(() => user.age++);
+        expect(user.age).toBe(2);
+    });
+
     it("runner", () => {
         // effect(fn) → function (runner) → fn → return
         let count = 10;

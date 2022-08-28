@@ -20,8 +20,12 @@ function createGetter(isReadonly: boolean = false, shallow: boolean = false) {
 
         const res = Reflect.get(target, key);
 
+        if (!isReadonly) {
+            // 收集依赖
+            track(target, key);
+        }
+
         if (shallow) {
-            // 此时返回的 res 不是响应式的，没有 get 和 set
             return res;
         }
 
@@ -29,10 +33,6 @@ function createGetter(isReadonly: boolean = false, shallow: boolean = false) {
             return isReadonly ? readonly(res) : reactive(res);
         }
 
-        if (!isReadonly) {
-            // 收集依赖
-            track(target, key);
-        }
         return res;
     };
 }

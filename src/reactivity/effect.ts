@@ -36,7 +36,7 @@ export class ReactiveEffect {
     }
 }
 
-// page 50: 分支切换与 cleanup
+// page 50: 分支切换与 cleanup TODO
 function cleanupEffect(effect: any) {
     effect.deps.forEach((dep: any) => {
         dep.delete(effect);
@@ -88,11 +88,15 @@ export function triggerEffects(dep: any) {
         if (effect.scheduler) {
             effect.scheduler();
         } else {
+            // 如果依赖收集中（表示副作用函数正在执行），如果执行中又要触发相同的副作用函数，会导致无限递归循环
+            // TODO 可能不需要此功能，与 stop 一起使用？
+            if (shouldTrack && effect.run === activeEffect.run) return;
             effect.run();
         }
     }
 }
 
+// scheduler 为调度器，控制副作用函数的执行时机
 export function effect(fn: any, options: any = {}) {
     const _effect = new ReactiveEffect(fn, options.scheduler);
     extend(_effect, options);
