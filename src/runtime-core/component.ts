@@ -40,7 +40,5 @@ function finishComponentSetup(instance: any) {
     const Component = instance.type;
 
     // render 往外提了一层
-    if (Component.render) {
-        instance.render = Component.render;
-    }
+    instance.render = Component.render;
 }

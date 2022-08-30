@@ -1,4 +1,5 @@
-import { createApp } from "../../src/runtime-core/index";
-import { App } from "./app";
+import { createApp } from "../../lib/guide-mini-vue.esm.js";
+import { App } from "./app.js";
 
-createApp(App).mount("#app");
+const rootContainer = document.querySelector("#app");
+createApp(App).mount(rootContainer);

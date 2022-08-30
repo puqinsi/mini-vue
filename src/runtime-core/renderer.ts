@@ -6,7 +6,11 @@ export function render(vnode: any, container: any) {
 }
 
 function patch(vnode: any, container: any) {
-    // 去处理组件
+    // TODO
+    // 处理 element 类型
+    // 思考：如何区分 element 类型和 component 类型
+
+    // 去处理 component 类型
     processComponent(vnode, container);
 }
 
