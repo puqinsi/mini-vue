@@ -1,11 +1,14 @@
 import { h } from "../../lib/guide-mini-vue.esm.js";
 
+window.self = null;
 export const App = {
     render() {
+        window.self = this;
         return h(
             "div",
             { class: "root" },
-            // `hi, mini-vue`,
+            // setupStatus, $el->get root element
+            // `hi, ${this.msg}`,
             [
                 h("p", { class: "red" }, "hi"),
                 h("p", { class: "pink" }, "mini-vue"),
@@ -16,7 +19,7 @@ export const App = {
     setup() {
         // composition api
         return {
-            msg: "mini-vue",
+            msg: "mini-vue-zc",
         };
     },
 };

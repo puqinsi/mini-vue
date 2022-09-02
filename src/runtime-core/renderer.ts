@@ -23,8 +23,8 @@ function processElement(vnode: any, container: any) {
 
 function mountElement(vnode: any, container: any) {
     const { type, props, children } = vnode;
-    // 创建元素
-    const el = document.createElement(type);
+    // 创建元素 el -> element
+    const el = (vnode.el = document.createElement(type));
 
     // 添加属性
     for (const key in props) {
@@ -59,17 +59,22 @@ function processComponent(vnode: any, container: any) {
 }
 
 function mountComponent(vnode: any, container: any) {
+    // 创建组件 instance
     const instance = createComponentInstance(vnode);
+    // 初始化 setup 数据
     setupComponent(instance);
-
-    setupRenderEffect(instance, container);
+    // 渲染组件
+    setupRenderEffect(instance, vnode, container);
 }
 
-function setupRenderEffect(instance: any, container: any) {
-    const subTree = instance.render();
+function setupRenderEffect(instance: any, vnode: any, container: any) {
+    const { proxy } = instance;
+    const subTree = instance.render.call(proxy);
 
     // vnode => patch
     // vnode => element => mountElement
-
     patch(subTree, container);
+
+    // 等组件处理完，element 也就生产好了
+    vnode.el = subTree.el;
 }
