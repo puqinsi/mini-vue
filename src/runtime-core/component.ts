@@ -2,6 +2,7 @@ export function createComponentInstance(vnode: any) {
     const component = {
         vnode,
         type: vnode.type,
+        setupState: {},
     };
     return component;
 }
@@ -14,11 +15,28 @@ export function setupComponent(instance: any) {
     setupStatefulComponents(instance);
 }
 
+// 初始化组件
 function setupStatefulComponents(instance: any) {
     const Component = instance.type;
 
-    const { setup } = Component;
+    //此代理对象被称为 ctx
+    instance.proxy = new Proxy(
+        {},
+        {
+            get(target, key) {
+                const { setupState } = instance;
+                if (key in setupState) {
+                    return setupState[key];
+                }
 
+                if (key === "$el") {
+                    return instance.vnode.el;
+                }
+            },
+        },
+    );
+
+    const { setup } = Component;
     if (setup) {
         const setupResult = setup();
 
@@ -26,6 +44,7 @@ function setupStatefulComponents(instance: any) {
     }
 }
 
+// 挂载 setup 数据到组件实例
 function handleSetupResult(instance: any, setupResult: any) {
     // function object
     // TODO function
@@ -36,9 +55,9 @@ function handleSetupResult(instance: any, setupResult: any) {
     finishComponentSetup(instance);
 }
 
+// render 往外提了一层
 function finishComponentSetup(instance: any) {
     const Component = instance.type;
 
-    // render 往外提了一层
     instance.render = Component.render;
 }
