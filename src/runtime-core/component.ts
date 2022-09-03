@@ -1,3 +1,5 @@
+import { publicInstanceProxyHandlers } from "./componentPublicInstance";
+
 export function createComponentInstance(vnode: any) {
     const component = {
         vnode,
@@ -20,21 +22,7 @@ function setupStatefulComponents(instance: any) {
     const Component = instance.type;
 
     //此代理对象被称为 ctx
-    instance.proxy = new Proxy(
-        {},
-        {
-            get(target, key) {
-                const { setupState } = instance;
-                if (key in setupState) {
-                    return setupState[key];
-                }
-
-                if (key === "$el") {
-                    return instance.vnode.el;
-                }
-            },
-        },
-    );
+    instance.proxy = new Proxy({ _: instance }, publicInstanceProxyHandlers);
 
     const { setup } = Component;
     if (setup) {

@@ -1,8 +1,8 @@
 import { isObject } from "../shared";
 import { createComponentInstance, setupComponent } from "./component";
 
+// 注：此 render 和 instance.render 不是一回事
 export function render(vnode: any, container: any) {
-    // patch
     patch(vnode, container);
 }
 
@@ -58,23 +58,22 @@ function processComponent(vnode: any, container: any) {
     mountComponent(vnode, container);
 }
 
-function mountComponent(vnode: any, container: any) {
+function mountComponent(initialVNode: any, container: any) {
     // 创建组件 instance
-    const instance = createComponentInstance(vnode);
+    const instance = createComponentInstance(initialVNode);
     // 初始化 setup 数据
     setupComponent(instance);
     // 渲染组件
-    setupRenderEffect(instance, vnode, container);
+    setupRenderEffect(instance, initialVNode, container);
 }
 
-function setupRenderEffect(instance: any, vnode: any, container: any) {
+function setupRenderEffect(instance: any, initialVNode: any, container: any) {
     const { proxy } = instance;
-    const subTree = instance.render.call(proxy);
 
-    // vnode => patch
-    // vnode => element => mountElement
+    // vnode -> patch，和 createApp mount 的处理一样
+    const subTree = instance.render.call(proxy);
     patch(subTree, container);
 
-    // 等组件处理完，element 也就生产好了
-    vnode.el = subTree.el;
+    // 等组件处理完，所有 element 都创建好，添加到父节点上
+    initialVNode.el = subTree.el;
 }
