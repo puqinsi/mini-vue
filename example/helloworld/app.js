@@ -11,7 +11,7 @@ export const App = {
             // `hi, ${this.msg}`,
             [
                 h("p", { class: "red" }, "hi"),
-                h("p", { class: "pink" }, "mini-vue"),
+                h("p", { class: "green" }, "mini-vue"),
                 "hi, mini-vue",
             ],
         );
