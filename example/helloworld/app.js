@@ -6,7 +6,15 @@ export const App = {
         window.self = this;
         return h(
             "div",
-            { class: "root" },
+            {
+                class: "root",
+                onClick() {
+                    console.log("click");
+                },
+                onMousedown() {
+                    console.log("mousedown");
+                },
+            },
             // setupStatus, $el->get root element
             // `hi, ${this.msg}`,
             [
