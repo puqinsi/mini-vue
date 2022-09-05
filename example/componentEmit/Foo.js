@@ -7,7 +7,7 @@ export const Foo = {
 
         const emitAdd = () => {
             console.log("emit");
-            emit("add");
+            emit("add", 1, 2);
             emit("add-foo");
         };
         return {
@@ -20,7 +20,7 @@ export const Foo = {
             {
                 onClick: this.emitAdd,
             },
-            "add",
+            "emitEvent",
         );
         const foo = h("div", {}, `foo: ${this.count}`);
 

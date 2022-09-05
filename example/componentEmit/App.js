@@ -17,11 +17,11 @@ export const App = {
                 "hi, mini-vue",
                 h(Foo, {
                     count: 1,
-                    onAdd() {
-                        console.log("onAdd");
+                    onAdd(...arg) {
+                        console.log("onAdd", arg);
                     },
-                    onAddFoo() {
-                        console.log("onAddFoo");
+                    onAddFoo(...arg) {
+                        console.log("onAddFoo", arg);
                     },
                 }),
             ],
