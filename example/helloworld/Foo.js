@@ -5,9 +5,8 @@ export const Foo = {
     setup(props) {
         // 1. setup 可以传入 props
         console.log(props);
-
         // 3. props shallowReadonly
-        props.count++;
+        // props.count++;
     },
     render() {
         // 2. render 可以获取
