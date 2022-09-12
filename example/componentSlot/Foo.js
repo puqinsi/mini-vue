@@ -9,7 +9,7 @@ export const Foo = {
         const foo = h("div", {}, "foo");
         // 具名插槽
         return h("div", {}, [
-            renderSlots(this.$slots, "header"),
+            renderSlots(this.$slots, "header", { age: 18 }),
             foo,
             renderSlots(this.$slots, "footer"),
         ]);

@@ -11,7 +11,10 @@ export const App = {
         const foo = h(
             Foo,
             {},
-            { header: h("div", {}, "123"), footer: h("div", {}, "456") },
+            {
+                header: ({ age }) => h("div", {}, "header" + age),
+                footer: () => h("div", {}, "footer"),
+            },
         );
         return h(
             "div",
@@ -24,7 +27,7 @@ export const App = {
     setup() {
         // composition api
         return {
-            msg: "mini-vue-zc",
+            msg: "mini-vue",
         };
     },
 };
