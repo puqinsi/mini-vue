@@ -1,6 +1,7 @@
 import { isObject } from "../shared";
 import { ShapeFlags } from "../shared/shapeFlags";
 import { createComponentInstance, setupComponent } from "./component";
+import { Fragment, Text } from "./vnode";
 
 // 注：此 render 和 instance.render 不是一回事
 export function render(vnode: any, container: any) {
@@ -8,14 +9,33 @@ export function render(vnode: any, container: any) {
 }
 
 function patch(vnode: any, container: any) {
-    const { shapeFlag } = vnode;
-    if (shapeFlag & ShapeFlags.ELEMENT) {
-        // 处理 element 类型
-        processElement(vnode, container);
-    } else if (shapeFlag & ShapeFlags.STATEFUL_COMPONENT) {
-        // 去处理 component 类型
-        processComponent(vnode, container);
+    const { type, shapeFlag } = vnode;
+    switch (type) {
+        case Fragment:
+            processFragment(vnode, container);
+            break;
+        case Text:
+            processText(vnode, container);
+            break;
+        default:
+            if (shapeFlag & ShapeFlags.ELEMENT) {
+                // 处理 element 类型
+                processElement(vnode, container);
+            } else if (shapeFlag & ShapeFlags.STATEFUL_COMPONENT) {
+                // 去处理 component 类型
+                processComponent(vnode, container);
+            }
     }
+}
+
+function processFragment(vnode: any, container: any) {
+    mountChildren(vnode, container);
+}
+
+function processText(vnode: any, container: any) {
+    const { children } = vnode;
+    const textNode = (vnode.el = document.createTextNode(children));
+    container.append(textNode);
 }
 
 // 处理 element 类型
@@ -57,10 +77,7 @@ function mountElement(vnode: any, container: any) {
 
 function mountChildren(vnode: any, container: any) {
     vnode.children.forEach((v: any) => {
-        if (typeof v === "string") {
-            const textNode = document.createTextNode(v);
-            container.appendChild(textNode);
-        } else if (isObject(v)) {
+        if (isObject(v)) {
             patch(v, container);
         }
     });
