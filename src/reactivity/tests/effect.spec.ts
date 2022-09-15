@@ -112,7 +112,7 @@ describe("effect", () => {
     // 嵌套响应对象，effect只会收集属性对应的值为非对象的依赖
     it("nested effect", () => {
         let obj = reactive({ foo: 1, bar: { coo: 2 } });
-        let baz;
+        let baz = { coo: 0 };
         effect(() => {
             baz = obj.bar;
         });
