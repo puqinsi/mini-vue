@@ -1,2 +1,2 @@
-// 公共入口
-export * from "./runtime-core";
+// 公共出口
+export * from "./runtime-dom";
