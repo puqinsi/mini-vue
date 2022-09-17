@@ -14,7 +14,11 @@ function patchProp(el: any, key: any, value: any) {
         el.addEventListener(event, value);
     } else {
         // 属性
-        el.setAttribute(key, value);
+        if (value !== undefined && value !== null) {
+            el.setAttribute(key, value);
+        } else {
+            el.removeAttribute(key, value);
+        }
     }
 }
 
