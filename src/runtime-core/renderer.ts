@@ -1,5 +1,5 @@
 import { effect } from "../reactivity/effect";
-import { isObject } from "../shared/index";
+import { EMPTY_OBJ, isObject } from "../shared/index";
 import { ShapeFlags } from "../shared/shapeFlags";
 import { createComponentInstance, setupComponent } from "./component";
 import { createAppApi } from "./createApp";
@@ -81,7 +81,37 @@ export function createRenderer(options: any) {
         console.log("n2", n2);
 
         // props diff
+        const oldProps = n1.props || EMPTY_OBJ;
+        const newProps = n2.props || EMPTY_OBJ;
+        const el = (n2.el = n1.el);
+        patchProps(el, oldProps, newProps);
+
         // children diff
+    }
+
+    function patchProps(el: any, oldProps: any, newProps: any) {
+        // 1. newProps 中属性值修改 -> 修改
+        // 2. newProps 中属性值修改为 undefined | null -> 删除
+        // 3. newProps 中属性删除 -> 删除
+        if (oldProps !== newProps) {
+            if (newProps !== EMPTY_OBJ) {
+                for (const key in newProps) {
+                    const nextProp = newProps[key];
+                    const prevProp = oldProps[key];
+                    if (prevProp !== nextProp) {
+                        hostPatchProp(el, key, nextProp);
+                    }
+                }
+            }
+
+            if (oldProps !== EMPTY_OBJ) {
+                for (const key in oldProps) {
+                    if (!(key in newProps)) {
+                        hostPatchProp(el, key, null);
+                    }
+                }
+            }
+        }
     }
 
     function mountElement(vnode: any, container: any, parentComponent: any) {
