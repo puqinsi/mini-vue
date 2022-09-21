@@ -22,9 +22,9 @@ function patchProp(el: any, key: any, value: any) {
     }
 }
 
-function insert(el: any, container: any) {
-    // 添加到container
-    container.append(el);
+function insert(child: any, container: any, anchor: any) {
+    // 添加到 container
+    container.insertBefore(child, anchor);
 }
 
 function remove(child: any) {
