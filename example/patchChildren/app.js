@@ -7,15 +7,14 @@ import TextToArray from "./TextToArray.js";
 export const App = {
     name: "App",
     setup() {
-        console.log(TextToArray);
         return {};
     },
     render() {
         return h(
             // TextToArray,
             // TextToText,
-            ArrayToText,
-            // ArrayToArray,
+            // ArrayToText,
+            ArrayToArray,
         );
     },
 };
