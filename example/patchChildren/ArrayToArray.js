@@ -11,23 +11,23 @@ export default {
         };
     },
     render() {
-        /* 1. 左侧对比 */
+        /* 1. 左侧对比 TODO 验证 */
         // (a b) c
         // (a b) d e
-        const prevChildren = h("div", {}, [
-            h("div", { key: "A" }, "A"),
-            h("div", { key: "B" }, "B"),
-            h("div", { key: "C" }, "C"),
-        ]);
+        // const prevChildren = h("div", {}, [
+        //     h("div", { key: "A" }, "A"),
+        //     h("div", { key: "B" }, "B"),
+        //     h("div", { key: "C" }, "C"),
+        // ]);
 
-        const nextChildren = h("div", {}, [
-            h("div", { key: "A" }, "A"),
-            h("div", { key: "B" }, "B"),
-            h("div", { key: "D" }, "D"),
-            h("div", { key: "E" }, "E"),
-        ]);
+        // const nextChildren = h("div", {}, [
+        //     h("div", { key: "A" }, "A"),
+        //     h("div", { key: "B" }, "B"),
+        //     h("div", { key: "D" }, "D"),
+        //     h("div", { key: "E" }, "E"),
+        // ]);
 
-        /* 2. 右侧对比 */
+        /* 2. 右侧对比 TODO 验证 */
         //   c (b a)
         // e d (b a)
         // const prevChildren = h("div", {}, [
@@ -99,6 +99,54 @@ export default {
         //     h("div", { key: "C" }, "C"),
         //     h("div", { key: "D" }, "D"),
         // ]);
+
+        /* 5. 中间 */
+        // (a b) c e f (g h)
+        // (a b) d c (g h)
+        // 创建新节点
+        // 删除老节点
+        // 移动老节点
+        // const prevChildren = h("div", {}, [
+        //     h("div", { key: "A" }, "A"),
+        //     h("div", { key: "B" }, "B"),
+        //     h("div", { key: "C", id: "prev" }, "C"),
+        //     h("div", { key: "E" }, "E"),
+        //     h("div", { key: "F" }, "F"),
+        //     h("div", { key: "G" }, "G"),
+        //     h("div", { key: "H" }, "H"),
+        // ]);
+
+        // const nextChildren = h("div", {}, [
+        //     h("div", { key: "A" }, "A"),
+        //     h("div", { key: "B" }, "B"),
+        //     h("div", { key: "D" }, "D"),
+        //     h("div", { key: "C", id: "next" }, "C"),
+        //     h("div", { key: "G" }, "G"),
+        //     h("div", { key: "H" }, "H"),
+        // ]);
+
+        /* 5.1 删除优化 */
+        // (a b) c d e (g h)
+        // (a b) c d (g h)
+        // prevChildren 超出 nextChildren 变动部分的 child 直接删除
+        const prevChildren = h("div", {}, [
+            h("div", { key: "A" }, "A"),
+            h("div", { key: "B" }, "B"),
+            h("div", { key: "C", id: "prev" }, "C"),
+            h("div", { key: "D" }, "D"),
+            h("div", { key: "E" }, "E"),
+            h("div", { key: "G" }, "G"),
+            h("div", { key: "H" }, "H"),
+        ]);
+
+        const nextChildren = h("div", {}, [
+            h("div", { key: "A" }, "A"),
+            h("div", { key: "B" }, "B"),
+            h("div", { key: "D" }, "D"),
+            h("div", { key: "C", id: "next" }, "C"),
+            h("div", { key: "G" }, "G"),
+            h("div", { key: "H" }, "H"),
+        ]);
 
         return this.flag ? nextChildren : prevChildren;
     },
