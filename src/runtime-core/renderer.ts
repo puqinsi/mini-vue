@@ -1,5 +1,5 @@
 import { effect } from "../reactivity/effect";
-import { EMPTY_OBJ, isObject } from "../shared/index";
+import { EMPTY_OBJ, getSequence, isObject } from "../shared/index";
 import { ShapeFlags } from "../shared/shapeFlags";
 import { createComponentInstance, setupComponent } from "./component";
 import { createAppApi } from "./createApp";
@@ -187,9 +187,9 @@ export function createRenderer(options: any) {
         // 新的比老的长 -> 创建
         if (i > e1) {
             if (i <= e2) {
-                const insertPost = e2 + 1;
+                const nextIndex = e2 + 1;
                 // 左侧新增的首部插入（需要插入位 el），右侧新增的尾部插入（不需要插入位 el）
-                const anchor = insertPost < l2 ? c2[insertPost].el : null;
+                const anchor = nextIndex < l2 ? c2[nextIndex].el : null;
 
                 while (i <= e2) {
                     patch(null, c2[i], container, parentComponent, anchor);
@@ -204,15 +204,22 @@ export function createRenderer(options: any) {
                 i++;
             }
         } else {
-            // 中间对比
+            /* 中间对比 */
             const s1 = i;
             const s2 = i;
 
             const toBePatch = e2 - i + 1;
             let patchCount = 0;
-
-            // children 更新时 key 的作用，优化更新流程，如果 child 有绑定 key 可以直接映射查找，否则需要遍历查找
+            // key -> newIndex 的映射。children 更新时 key 的作用，优化更新流程，如果 child 有绑定 key 可以直接映射查找，否则需要遍历查找
             const keyToNewIndexMap = new Map();
+            // index（指的是需要 patch 的元素中的 index，不是 c2 中的 index） -> oldIndex（指的是 c1 中的 index）的映射。用定长数组优化性能
+            const indexToOldIndexMap = new Array(toBePatch);
+            let moved = false;
+            let maxIndexSoFar = 0;
+
+            // 初始化，0 表示 newIndex 在 prevChildren 中没有映射，需要新增
+            for (let i = 0; i < toBePatch; i++) indexToOldIndexMap[i] = 0;
+
             for (let i = s2; i <= e2; i++) {
                 keyToNewIndexMap.set(c2[i].key, i);
             }
@@ -220,7 +227,7 @@ export function createRenderer(options: any) {
             for (let i = s1; i <= e1; i++) {
                 const prevChild = c1[i];
 
-                // 超出 nextChildren 变动部分的 child 直接删除
+                // 超出 c2 变动部分的 child -> 删除
                 if (patchCount >= toBePatch) {
                     hostRemove(prevChild.el);
                     continue;
@@ -243,6 +250,15 @@ export function createRenderer(options: any) {
                 if (newIndex === undefined) {
                     hostRemove(prevChild.el);
                 } else {
+                    // 优化移动：为何放在这里，因为 prevChild 在 c2 中存在才需要移动，判断 newIndex 是不是递增，不是的话需要移动
+                    if (newIndex >= maxIndexSoFar) {
+                        maxIndexSoFar = newIndex;
+                    } else {
+                        moved = true;
+                    }
+                    // 注意：i 有可能是 0，因为 0 表示需要创建，所以用 i+1
+                    indexToOldIndexMap[newIndex - s2] = i + 1;
+
                     // prevChild 在 c2 中存在 -> 更新
                     patch(
                         prevChild,
@@ -251,8 +267,32 @@ export function createRenderer(options: any) {
                         parentComponent,
                         null,
                     );
-
                     patchCount++;
+                }
+            }
+
+            // 求出最长递增子序列（稳定序列），内容是 indexToOldIndexMap 中的 index
+            const increasingNewIndexSequence = moved
+                ? getSequence(indexToOldIndexMap)
+                : [];
+            let j = increasingNewIndexSequence.length - 1;
+            // 倒序移动，确保插入前的元素位置都是稳定的。
+            for (let i = toBePatch - 1; i >= 0; i--) {
+                const nextIndex = i + s2;
+                const nextChild = c2[nextIndex];
+                const anchor = nextIndex + 1 < l2 ? c2[nextIndex + 1].el : null;
+
+                // 如果没有到老节点的映射，表示新增 -> 创建
+                if (indexToOldIndexMap[i] === 0) {
+                    patch(null, nextChild, container, parentComponent, anchor);
+                } else if (moved) {
+                    // 如果该位置的元素不是稳定序列中的元素 -> 移动
+                    if (j < 0 || i !== increasingNewIndexSequence[j]) {
+                        // 移动位置
+                        hostInsert(nextChild.el, container, anchor);
+                    } else {
+                        j--;
+                    }
                 }
             }
         }
