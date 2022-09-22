@@ -24,7 +24,7 @@ function patchProp(el: any, key: any, value: any) {
 
 function insert(child: any, container: any, anchor: any) {
     // 添加到 container
-    container.insertBefore(child, anchor);
+    container.insertBefore(child, anchor || null);
 }
 
 function remove(child: any) {
