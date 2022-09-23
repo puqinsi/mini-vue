@@ -11,6 +11,7 @@ export function createVNode(type: any, props?: any, children?: any) {
         key: props ? props.key : "", // TODO
         shapeFlag: getShapeFlag(type),
         el: null,
+        component: null,
     };
 
     // children 合并 shape

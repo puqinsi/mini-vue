@@ -2,6 +2,7 @@ import { effect } from "../reactivity/effect";
 import { EMPTY_OBJ, getSequence, isObject } from "../shared/index";
 import { ShapeFlags } from "../shared/shapeFlags";
 import { createComponentInstance, setupComponent } from "./component";
+import { shouldUpdateComponent } from "./componentUpdateUtils";
 import { createAppApi } from "./createApp";
 import { Fragment, Text } from "./vnode";
 
@@ -165,7 +166,6 @@ export function createRenderer(options: any) {
 
             i++;
         }
-        console.log(i, e1, e2);
 
         // 第二步：右侧对比，e1, e2 向左移
         while (i <= e1 && i <= e2) {
@@ -181,7 +181,6 @@ export function createRenderer(options: any) {
             e1--;
             e2--;
         }
-        console.log(i, e1, e2);
 
         /* 处理：针对指针的不同情况 */
         // 新的比老的长 -> 创建
@@ -238,7 +237,7 @@ export function createRenderer(options: any) {
                 if (prevChild.key !== null) {
                     newIndex = keyToNewIndexMap.get(prevChild.key);
                 } else {
-                    for (let j = s2; j < e2; j++) {
+                    for (let j = s2; j <= e2; j++) {
                         if (isSameVnodeType(prevChild, c2[j])) {
                             newIndex = j;
                             break;
@@ -377,8 +376,25 @@ export function createRenderer(options: any) {
         parentComponent: any,
         anchor: any,
     ) {
-        // 挂载组件
-        mountComponent(n2, container, parentComponent, anchor);
+        if (!n1) {
+            console.log("初始化 component");
+            // 挂载组件
+            mountComponent(n2, container, parentComponent, anchor);
+        } else {
+            console.log("更新 component");
+            updateComponent(n1, n2);
+        }
+    }
+
+    function updateComponent(n1: any, n2: any) {
+        const instance = (n2.component = n1.component);
+        if (shouldUpdateComponent(n1, n2)) {
+            instance.next = n2;
+            instance.update();
+        } else {
+            n2.el = n1.el;
+            instance.vnode = n2;
+        }
     }
 
     function mountComponent(
@@ -387,8 +403,11 @@ export function createRenderer(options: any) {
         parentComponent: any,
         anchor: any,
     ) {
-        // 创建组件 instance
-        const instance = createComponentInstance(initialVNode, parentComponent);
+        // 创建组件 instance，把 instance 挂载到 vnode 上，component 更新逻辑要用
+        const instance = (initialVNode.component = createComponentInstance(
+            initialVNode,
+            parentComponent,
+        ));
 
         // 初始化 setup 数据
         setupComponent(instance);
@@ -403,7 +422,7 @@ export function createRenderer(options: any) {
         container: any,
         anchor: any,
     ) {
-        effect(() => {
+        instance.update = effect(() => {
             const { proxy, isMounded, subTree: preSubTree } = instance;
             if (!isMounded) {
                 console.log("init");
@@ -418,12 +437,26 @@ export function createRenderer(options: any) {
                 instance.isMounded = true;
             } else {
                 console.log("update");
+
+                const { next, vnode } = instance;
+                if (next) {
+                    next.el = vnode.el;
+                    updateComponentPreRender(instance, next);
+                }
+
                 const subTree = instance.render.call(proxy);
                 instance.subTree = subTree;
 
                 patch(preSubTree, subTree, container, instance, anchor);
             }
         });
+
+        // 对照 createComponentInstance，把与 vnode 更新相关的属性更新
+        function updateComponentPreRender(instance: any, nextVNode: any) {
+            instance.vnode = nextVNode;
+            instance.next = null;
+            instance.props = nextVNode.props;
+        }
     }
 
     return {
