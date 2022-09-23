@@ -13,6 +13,8 @@ export function createComponentInstance(vnode: any, parent: any) {
         props: {},
         slots: [],
         provides: parent ? parent.provides : {},
+        update: null, // effect runner
+        next: null, // 更新的 vnode
         parent,
         isMounted: false,
         subTree: {},
