@@ -391,6 +391,9 @@ export function createRenderer(options: any) {
         if (shouldUpdateComponent(n1, n2)) {
             instance.next = n2;
             instance.update();
+        } else {
+            n2.el = n1.el;
+            instance.vnode = n2;
         }
     }
 
