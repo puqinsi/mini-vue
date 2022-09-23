@@ -4,6 +4,7 @@ import { ShapeFlags } from "../shared/shapeFlags";
 import { createComponentInstance, setupComponent } from "./component";
 import { shouldUpdateComponent } from "./componentUpdateUtils";
 import { createAppApi } from "./createApp";
+import { queueJobs } from "./scheduler";
 import { Fragment, Text } from "./vnode";
 
 // 把具体实现，改成接口传入形式，把具体功能抽象成公用功能
@@ -422,34 +423,43 @@ export function createRenderer(options: any) {
         container: any,
         anchor: any,
     ) {
-        instance.update = effect(() => {
-            const { proxy, isMounded, subTree: preSubTree } = instance;
-            if (!isMounded) {
-                console.log("init");
-                // vnode -> patch，和 createApp mount 的处理一样
-                const subTree = (instance.subTree =
-                    instance.render.call(proxy));
-                patch(null, subTree, container, instance, anchor);
+        instance.update = effect(
+            () => {
+                const { proxy, isMounded, subTree: preSubTree } = instance;
+                if (!isMounded) {
+                    console.log("init");
+                    // vnode -> patch，和 createApp mount 的处理一样
+                    const subTree = (instance.subTree =
+                        instance.render.call(proxy));
+                    patch(null, subTree, container, instance, anchor);
 
-                // 等组件处理完，所有 element 都创建好，添加到父节点上
-                initialVNode.el = subTree.el;
+                    // 等组件处理完，所有 element 都创建好，添加到父节点上
+                    initialVNode.el = subTree.el;
 
-                instance.isMounded = true;
-            } else {
-                console.log("update");
+                    instance.isMounded = true;
+                } else {
+                    console.log("update");
 
-                const { next, vnode } = instance;
-                if (next) {
-                    next.el = vnode.el;
-                    updateComponentPreRender(instance, next);
+                    const { next, vnode } = instance;
+                    if (next) {
+                        next.el = vnode.el;
+                        updateComponentPreRender(instance, next);
+                    }
+
+                    const subTree = instance.render.call(proxy);
+                    instance.subTree = subTree;
+
+                    patch(preSubTree, subTree, container, instance, anchor);
                 }
-
-                const subTree = instance.render.call(proxy);
-                instance.subTree = subTree;
-
-                patch(preSubTree, subTree, container, instance, anchor);
-            }
-        });
+            },
+            {
+                // 巧妙利用 effect 调度器，把每一帧的更新任务先保存到队列里，等主任务完成后，在调用微任务一次更新。
+                scheduler() {
+                    console.log("update scheduler");
+                    queueJobs(instance.update);
+                },
+            },
+        );
 
         // 对照 createComponentInstance，把与 vnode 更新相关的属性更新
         function updateComponentPreRender(instance: any, nextVNode: any) {
