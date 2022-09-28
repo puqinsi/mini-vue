@@ -27,9 +27,25 @@ function parseChildren(context: any) {
       node = parseElement(context);
     }
   }
+
+  if (!node) {
+    node = parseText(context);
+  }
+
   nodes.push(node);
 
   return nodes;
+}
+
+function parseText(context: any): any {
+  // 之所以这么写是为了统一写法，然后抽象通用函数
+  const content = parseTextData(context, context.source.length);
+  console.log("context source:", context.source);
+
+  return {
+    type: NodeTypes.TEXT,
+    content,
+  };
 }
 
 function parseElement(context: any): any {
@@ -74,10 +90,10 @@ function parseInterpolation(context: any) {
 
   const rawContentLength = closeIndex - closeDelimiterLength;
   // 细节：原始值先保留，再根据需要处理
-  const rawContent = context.source.slice(0, rawContentLength);
+  const rawContent = parseTextData(context, rawContentLength);
   const content = rawContent.trim();
 
-  advanceBy(context, rawContentLength + closeDelimiterLength);
+  advanceBy(context, closeDelimiterLength);
 
   return {
     type: NodeTypes.INTERPOLATION,
@@ -86,6 +102,14 @@ function parseInterpolation(context: any) {
       content,
     },
   };
+}
+
+// 取内容 & 内容推进
+function parseTextData(context: any, length: number) {
+  const content = context.source.slice(0, length);
+  advanceBy(context, length);
+
+  return content;
 }
 
 // 内容推进处理
