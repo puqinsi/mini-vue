@@ -79,10 +79,11 @@ function parseText(context: any): any {
 function parseElement(context: any, ancestors: string[]): any {
   // 处理开始标签，拿到 element
   const element: any = parseTag(context, TagTypes.START);
-  ancestors.push(element.tag);
+  // 用栈存储 element
+  ancestors.unshift(element.tag);
 
   element.children = parseChildren(context, ancestors);
-  ancestors.pop();
+  ancestors.shift();
 
   // 处理结束标签
   if (startWidthEndTagOpen(context.source, element.tag)) {
