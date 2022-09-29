@@ -11,36 +11,63 @@ export function basicParse(content: string) {
   const context = createParserContext(content);
 
   // 返回 ast（Abstract Syntax Tree）抽象语法树
-  return createRoot(parseChildren(context));
+  return createRoot(parseChildren(context, []));
 }
 
-function parseChildren(context: any) {
-  const s = context.source;
+function parseChildren(context: any, ancestors: string[]) {
   const nodes = [];
 
-  let node;
-  if (s.startsWith("{{")) {
-    // 解析插 值，返回虚拟节点
-    node = parseInterpolation(context);
-  } else if (s[0] === "<") {
-    if (/[a-z]/i.test(s[1])) {
-      node = parseElement(context);
+  while (!isEnd(context, ancestors)) {
+    let s = context.source.trim();
+
+    let node;
+    if (s.startsWith("{{")) {
+      // 解析插 值，返回虚拟节点
+      node = parseInterpolation(context);
+    } else if (s[0] === "<") {
+      if (/[a-z]/i.test(s[1])) {
+        node = parseElement(context, ancestors);
+      }
     }
-  }
 
-  if (!node) {
-    node = parseText(context);
-  }
+    if (!node) {
+      node = parseText(context);
+    }
 
-  nodes.push(node);
+    nodes.push(node);
+  }
 
   return nodes;
 }
 
+function isEnd(context: any, ancestors: string[]) {
+  // context.source 遇到结束标签
+  const s = context.source.trim();
+  for (let i = 0; i < ancestors.length; i++) {
+    const tag = ancestors[i];
+    if (startWidthEndTagOpen(s, tag)) {
+      return true;
+    }
+  }
+
+  // context.source 为空结束
+  return !s;
+}
+
 function parseText(context: any): any {
+  const s = context.source;
+  let endIndex = s.length;
+  const endTokens = ["</", "{{"];
+  for (let i = 0; i < endTokens.length; i++) {
+    const index = s.indexOf(endTokens[i]);
+    if (index !== -1 && endIndex > index) {
+      endIndex = index;
+    }
+  }
+
   // 之所以这么写是为了统一写法，然后抽象通用函数
-  const content = parseTextData(context, context.source.length);
-  console.log("context source:", context.source);
+  const content = parseTextData(context, endIndex);
+  console.log("content:", content);
 
   return {
     type: NodeTypes.TEXT,
@@ -48,20 +75,30 @@ function parseText(context: any): any {
   };
 }
 
-function parseElement(context: any): any {
-  const element = parseTag(context, TagTypes.START);
-  console.log("context source:", context.source);
-  parseTag(context, TagTypes.END);
-  console.log("context source:", context.source);
+function parseElement(context: any, ancestors: string[]): any {
+  // 处理开始标签，拿到 element
+  const element: any = parseTag(context, TagTypes.START);
+  ancestors.push(element.tag);
+
+  element.children = parseChildren(context, ancestors);
+  ancestors.pop();
+
+  // 处理结束标签
+  if (startWidthEndTagOpen(context.source, element.tag)) {
+    parseTag(context, TagTypes.END);
+  } else {
+    throw new Error(`缺少结束标签:${element.tag}`);
+  }
 
   return element;
 }
 
 function parseTag(context: any, type: any) {
+  // element tag 前的空格需要去掉
+  advanceBySpace(context);
   // 1. 匹配 & 解析
   const match: any = /^<\/?([a-z]*)/i.exec(context.source);
   const tag = match[1];
-  console.log(match);
 
   // 2. 推进代码
   advanceBy(context, match[0].length);
@@ -112,6 +149,13 @@ function parseTextData(context: any, length: number) {
   return content;
 }
 
+// 清除多余空格，内容推进
+function advanceBySpace(context: any) {
+  while (context.source.startsWith(" ")) {
+    advanceBy(context, 1);
+  }
+}
+
 // 内容推进处理
 function advanceBy(context: any, length: number) {
   context.source = context.source.slice(length);
@@ -125,4 +169,11 @@ function createRoot(children: any) {
 
 function createParserContext(content: string) {
   return { source: content };
+}
+
+function startWidthEndTagOpen(source: any, tag: string) {
+  return (
+    source.startsWith("</") &&
+    source.slice(2, 2 + tag.length).toLowerCase() === tag.toLowerCase()
+  );
 }
