@@ -25,6 +25,7 @@ describe("Parse", () => {
       expect(ast.children[0]).toStrictEqual({
         type: NodeTypes.ELEMENT,
         tag: "div",
+        children: [],
       });
     });
   });
@@ -41,29 +42,63 @@ describe("Parse", () => {
     });
   });
 
-  // TODO
   describe("mix content", () => {
-    it.skip("simple mix", () => {
+    it("happy path", () => {
       // root
-      const ast = basicParse("<div> hi,{{message}} </div>");
+      const ast = basicParse("<div>hi, {{message}}</div>");
 
       expect(ast.children[0]).toStrictEqual({
         type: NodeTypes.ELEMENT,
         tag: "div",
-        content: [
+        children: [
           {
             type: NodeTypes.TEXT,
-            content: "hi,",
+            content: "hi, ",
           },
           {
             type: NodeTypes.INTERPOLATION,
             content: {
               type: NodeTypes.SIMPLE_EXPRESSION,
-              context: "message",
+              content: "message",
             },
           },
         ],
       });
+    });
+
+    it("nested element", () => {
+      // root
+      const ast = basicParse("<div> <p>hi,</p>{{message}}</div>");
+
+      expect(ast.children[0]).toStrictEqual({
+        type: NodeTypes.ELEMENT,
+        tag: "div",
+        children: [
+          {
+            type: NodeTypes.ELEMENT,
+            tag: "p",
+            children: [
+              {
+                type: NodeTypes.TEXT,
+                content: "hi,",
+              },
+            ],
+          },
+          {
+            type: NodeTypes.INTERPOLATION,
+            content: {
+              type: NodeTypes.SIMPLE_EXPRESSION,
+              content: "message",
+            },
+          },
+        ],
+      });
+    });
+
+    it("should throw Error when lack end tag", () => {
+      expect(() => basicParse("<div><span></div>")).toThrow(
+        `缺少结束标签:span`,
+      );
     });
   });
 });
