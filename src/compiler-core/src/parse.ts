@@ -17,6 +17,7 @@ export function basicParse(content: string) {
 function parseChildren(context: any, ancestors: string[]) {
   const nodes = [];
 
+  // 处理核心：根据内容匹配到对应类型节点处理方法，直到内容全部处理完成，返回 AST
   while (!isEnd(context, ancestors)) {
     let s = context.source.trim();
 
