@@ -1,19 +1,14 @@
 import { NodeTypes } from "../src/ast";
 import { basicParse } from "../src/parse";
 import { transform } from "../src/transform";
+import { transformText } from "../src/transforms/transformText";
 
 describe("transform", () => {
   it("happy path", () => {
     const ast = basicParse("<div>hi,{{message}}</div>");
 
-    const plugin = (node: any) => {
-      if (node.type === NodeTypes.TEXT) {
-        node.content = node.content + "mini-vue";
-      }
-    };
-
     transform(ast, {
-      nodeTransforms: [plugin],
+      nodeTransforms: [transformText],
     });
 
     const nodeText = ast.children[0].children[0];
