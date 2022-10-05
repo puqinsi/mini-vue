@@ -1,7 +1,7 @@
 import { generate } from "../src/codegen";
 import { basicParse } from "../src/parse";
 import { transform } from "../src/transform";
-import { transformExpression } from "../src/transforms/transformExpression";
+import { transformElement, transformExpression } from "../src/transforms";
 
 describe("codegen", () => {
   it("string", () => {
@@ -23,7 +23,19 @@ describe("codegen", () => {
     transform(ast, {
       nodeTransforms: [transformExpression],
     });
-    console.log(ast);
+
+    const { code } = generate(ast);
+
+    expect(code).toMatchSnapshot();
+  });
+
+  it("element", () => {
+    const ast = basicParse("<div></div>");
+
+    transform(ast, {
+      nodeTransforms: [transformElement],
+    });
+
     const { code } = generate(ast);
 
     expect(code).toMatchSnapshot();
