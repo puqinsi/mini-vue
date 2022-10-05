@@ -68,7 +68,6 @@ function parseText(context: any): any {
 
   // 之所以这么写是为了统一写法，然后抽象通用函数
   const content = parseTextData(context, endIndex);
-  console.log("content:", content);
 
   return {
     type: NodeTypes.TEXT,

@@ -1,7 +1,6 @@
-import { NodeTypes } from "../src/ast";
 import { basicParse } from "../src/parse";
 import { transform } from "../src/transform";
-import { transformText } from "../src/transforms/transformText";
+import { transformText } from "../src/transforms";
 
 describe("transform", () => {
   it("happy path", () => {
