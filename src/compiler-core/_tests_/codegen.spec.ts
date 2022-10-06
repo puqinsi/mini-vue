@@ -1,7 +1,11 @@
 import { generate } from "../src/codegen";
 import { basicParse } from "../src/parse";
 import { transform } from "../src/transform";
-import { transformElement, transformExpression } from "../src/transforms";
+import {
+  transformCompound,
+  transformElement,
+  transformExpression,
+} from "../src/transforms";
 
 describe("codegen", () => {
   it("string", () => {
@@ -34,6 +38,22 @@ describe("codegen", () => {
 
     transform(ast, {
       nodeTransforms: [transformElement],
+    });
+
+    const { code } = generate(ast);
+
+    expect(code).toMatchSnapshot();
+  });
+
+  it("mix", () => {
+    const ast: any = basicParse("<div>hi, {{message}}</div>");
+
+    transform(ast, {
+      nodeTransforms: [
+        transformExpression,
+        transformElement,
+        transformCompound,
+      ],
     });
 
     const { code } = generate(ast);

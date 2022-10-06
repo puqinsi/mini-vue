@@ -1,3 +1,4 @@
+/* 所有 AST 的处理逻辑都应该放到 transform 中 */
 import { NodeTypes } from "./ast";
 import { TO_DISPLAY_STRING } from "./runtimeHelpers";
 
@@ -11,7 +12,12 @@ export function transform(root: any, options: any = {}) {
 }
 
 function createRootCodegen(root: any) {
-  root.codegenNode = root.children[0];
+  const child = root.children[0];
+  if (child.type === NodeTypes.ELEMENT) {
+    root.codegenNode = child.codegenNode;
+  } else {
+    root.codegenNode = child;
+  }
 }
 
 function createTransformContext(root: any, options: any) {
@@ -27,11 +33,14 @@ function createTransformContext(root: any, options: any) {
 }
 
 function traverseNode(node: any, context: any) {
+  /* 插件执行流程，类似捕获冒泡 */
+  // 进入时，执行插件
+  const exitTransforms = [];
   const nodeTransforms = context.nodeTransforms;
-
   for (let i = 0; i < nodeTransforms.length; i++) {
     const transform = nodeTransforms[i];
-    transform(node, context);
+    const exitFn = transform(node, context);
+    if (exitFn) exitTransforms.push(exitFn);
   }
 
   switch (node.type) {
@@ -44,6 +53,12 @@ function traverseNode(node: any, context: any) {
       break;
     default:
       break;
+  }
+
+  // 推出时，执行插件
+  let i = exitTransforms.length;
+  while (i--) {
+    exitTransforms[i]();
   }
 }
 
