@@ -1,6 +1,5 @@
 import { defineConfig } from "vitest/config";
 import path from "path";
-import AutoImport from "unplugin-auto-import/vite";
 
 export default defineConfig({
   test: {
@@ -14,10 +13,4 @@ export default defineConfig({
       },
     ],
   },
-  plugins: [
-    AutoImport({
-      imports: ["vitest"],
-      dts: true, // generate TypeScript declaration
-    }),
-  ],
 });
