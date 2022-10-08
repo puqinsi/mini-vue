@@ -4,10 +4,12 @@ Vue3 的核心功能源码的实现
 
 monorepo + vitest + ts
 
-- [x] Reactivity - TDD
+- [x] reactivity
 
-- [x] Runtime
+- [x] runtime-core
 
-- [x] Compiler - TDD
+- [x] runtime-dom
+
+- [x] compiler-core
 
 Finished
