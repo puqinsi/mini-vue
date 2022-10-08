@@ -1,6 +1,6 @@
 # mini-vue
 
-Vue3 的核心功能源码的实现
+Vue3 的核心功能源码实现
 
 monorepo + vitest + ts
 
