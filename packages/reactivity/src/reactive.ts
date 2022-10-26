@@ -27,12 +27,12 @@ export function shallowReadonly(target: any): any {
 }
 
 export function isReactive(value: any): boolean {
-  // 触发 get
+  // 触发 get，在 get 陷阱函数中判断是不是 reactive
   return !!value[ReactiveFlags.IS_REACTIVE];
 }
 
 export function isReadonly(value: any): boolean {
-  // 触发 get
+  // 触发 get，在 get 陷阱函数中判断是不是 readonly
   return !!value[ReactiveFlags.IS_READONLY];
 }
 

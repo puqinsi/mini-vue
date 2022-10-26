@@ -23,6 +23,7 @@ export class ReactiveEffect {
     shouldTrack = true;
     activeEffect = this;
     const res = this._fn();
+
     // 重置全局变量
     shouldTrack = false;
 
@@ -50,7 +51,7 @@ const targetMap = new Map();
 export function track(target: any, key: any) {
   if (!isTracking()) return;
 
-  // target => key => dep
+  // Map(target) => Map(key) => Set(dep)
   let depsMap = targetMap.get(target);
   if (!depsMap) {
     depsMap = new Map();
@@ -66,12 +67,14 @@ export function track(target: any, key: any) {
   trackEffects(dep);
 }
 
+// 执行收集依赖的方法，收集到 set 中，此方法 reactive 和 ref 都会使用
 export function trackEffects(dep: any) {
   if (dep.has(activeEffect)) return;
   dep.add(activeEffect);
   // 每个 activeEffect 存储所有被存储的的dep，为了 stop 时找到 activeEffect 所有对应的 dep，并从中删除，再触发依赖时不会执行
   activeEffect.deps.push(dep);
 }
+
 export function isTracking() {
   return activeEffect !== undefined && shouldTrack;
 }
@@ -79,10 +82,13 @@ export function isTracking() {
 // 触发依赖
 export function trigger(target: any, key: any) {
   const depsMap = targetMap.get(target);
-  const dep = depsMap.get(key);
-  triggerEffects(dep);
+  if (depsMap) {
+    const dep = depsMap.get(key);
+    triggerEffects(dep);
+  }
 }
 
+// 执行触发依赖的方法，遍历执行 set 中的副作用，此方法 reactive 和 ref 都会使用
 export function triggerEffects(dep: any) {
   for (const effect of dep) {
     if (effect.scheduler) {

@@ -1,9 +1,10 @@
+// 注：ELEMENT、STATEFUL_COMPONENT 表示 vnode 类型，TEXT_CHILDREN、ARRAY_CHILDREN、SLOTS_CHILDREN 表示vnode 的 children 类型，children 类型主要在更新时更多用到
 export const enum ShapeFlags {
-    ELEMENT = 1, // 1
-    STATEFUL_COMPONENT = 1 << 1, // 10
-    TEXT_CHILDREN = 1 << 2, // 100
-    ARRAY_CHILDREN = 1 << 3, // 1000
-    SLOTS_CHILDREN = 1 << 4, // 10000
+  ELEMENT = 1, // 1
+  STATEFUL_COMPONENT = 1 << 1, // 10
+  TEXT_CHILDREN = 1 << 2, // 100
+  ARRAY_CHILDREN = 1 << 3, // 1000
+  SLOTS_CHILDREN = 1 << 4, // 10000
 }
 
 /* 位运算 */
