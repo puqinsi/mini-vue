@@ -17,7 +17,7 @@ function patchProp(el: any, key: any, value: any) {
     if (value !== undefined && value !== null) {
       el.setAttribute(key, value);
     } else {
-      el.removeAttribute(key, value);
+      el.removeAttribute(key);
     }
   }
 }
@@ -38,6 +38,7 @@ function setElementText(el: any, text: any) {
   el.textContent = text;
 }
 
+// 把 dom 操作传给渲染器
 const renderer: any = createRenderer({
   createElement,
   patchProp,

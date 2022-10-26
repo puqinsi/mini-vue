@@ -113,9 +113,37 @@ describe("effect", () => {
   it("nested effect", () => {
     let obj = reactive({ foo: 1, bar: { coo: 2 } });
     let baz = { coo: 0 };
+    let count = 0;
     effect(() => {
       baz = obj.bar;
+      count++;
     });
     expect(baz.coo).toBe(2);
+    expect(count).toBe(1);
+
+    obj.bar.coo = 3;
+    expect(baz.coo).toBe(3);
+    expect(count).toBe(1);
+  });
+
+  it("effect this", () => {
+    let obj = {
+      a: 1,
+      get b() {
+        return this.a;
+      },
+    };
+
+    let p = reactive(obj);
+
+    let count = 0;
+    effect(() => {
+      count++;
+      return p.b;
+    });
+    expect(count).toBe(1);
+
+    p.a++;
+    expect(count).toBe(2);
   });
 });

@@ -1,5 +1,4 @@
 {
-    "cSpell.words": [
-        "PIXI"
-    ]
+  "cSpell.words": ["codegen", "PIXI"],
+  "testing.automaticallyOpenPeekView": "never"
 }

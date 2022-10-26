@@ -62,7 +62,7 @@ function handleSetupResult(instance: any, setupResult: any) {
   finishComponentSetup(instance);
 }
 
-// render 往外提了一层
+// 把组件的 render 添加到 instance 上
 function finishComponentSetup(instance: any) {
   const Component = instance.type;
   if (compiler && !Component.render) {
