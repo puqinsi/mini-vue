@@ -17,8 +17,8 @@ export function queueJobs(job: any) {
     queueFlush();
 }
 
-export function queuePreFlushCbs(cb: any) {
-    activePreFlushCbs.push(cb);
+export function queuePreFlushCbs(job: any) {
+    activePreFlushCbs.push(job);
 
     queueFlush();
 }
