@@ -47,7 +47,7 @@ describe("codegen", () => {
 
   it("mix", () => {
     const ast: any = basicParse("<div>hi, {{message}}</div>");
-
+    console.log("ast------", ast);
     transform(ast, {
       nodeTransforms: [
         transformExpression,
@@ -55,8 +55,10 @@ describe("codegen", () => {
         transformCompound,
       ],
     });
+    console.log("transform------", ast);
 
     const { code } = generate(ast);
+    console.log("code------", code);
 
     expect(code).toMatchSnapshot();
   });

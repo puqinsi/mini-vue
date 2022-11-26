@@ -7,7 +7,7 @@ const enum TagTypes {
 }
 
 export function basicParse(content: string) {
-  // 创建上下文对象
+  // 创建上下文对象 { source: content }
   const context = createParserContext(content);
 
   // 返回 ast（Abstract Syntax Tree）抽象语法树
@@ -164,8 +164,8 @@ function advanceBy(context: any, length: number) {
 
 function createRoot(children: any) {
   return {
-    children,
     type: NodeTypes.ROOT,
+    children,
   };
 }
 
