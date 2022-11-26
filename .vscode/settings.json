@@ -1,4 +1,5 @@
 {
-  "cSpell.words": ["codegen", "PIXI"],
-  "testing.automaticallyOpenPeekView": "never"
+    "cSpell.words": ["codegen", "PIXI"],
+    "testing.automaticallyOpenPeekView": "never",
+    "editor.tabSize": 4
 }
