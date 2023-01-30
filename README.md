@@ -12,4 +12,6 @@ monorepo + vitest + ts
 
 - [x] compiler-core
 
+- [] 加入生命周期
+
 Finished
