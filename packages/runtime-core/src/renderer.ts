@@ -13,7 +13,7 @@ export function createRenderer(options: any) {
     patchProp: hostPatchProp,
     insert: hostInsert,
     remove: hostRemove,
-    setElementText: hostSetElementText,
+    setElementText: hostSetElementText
   } = options;
 
   // 注：此 render 和 instance.render 不是一回事
@@ -28,7 +28,7 @@ export function createRenderer(options: any) {
     n2: any,
     container: any,
     parentComponent: any,
-    anchor: any,
+    anchor: any
   ): void {
     const { type, shapeFlag } = n2;
     switch (type) {
@@ -54,7 +54,7 @@ export function createRenderer(options: any) {
     n2: any,
     container: any,
     parentComponent: any,
-    anchor: any,
+    anchor: any
   ) {
     mountChildren(n2.children, container, parentComponent, anchor);
   }
@@ -71,7 +71,7 @@ export function createRenderer(options: any) {
     n2: any,
     container: any,
     parentComponent: any,
-    anchor: any,
+    anchor: any
   ) {
     if (!n1) {
       // 挂载元素
@@ -87,7 +87,7 @@ export function createRenderer(options: any) {
     n2: any,
     container: any,
     parentComponent: any,
-    anchor: any,
+    anchor: any
   ) {
     console.log("patchElement");
     console.log("n1", n1);
@@ -108,7 +108,7 @@ export function createRenderer(options: any) {
     n2: any,
     container: any,
     parentComponent: any,
-    anchor: any,
+    anchor: any
   ) {
     const { shapeFlag: prevShapeFlag, children: c1 } = n1;
     const { shapeFlag, children: c2 } = n2;
@@ -135,7 +135,7 @@ export function createRenderer(options: any) {
     c2: any,
     container: any,
     parentComponent: any,
-    anchor: any,
+    anchor: any
   ) {
     const l2 = c2.length;
     let i = 0;
@@ -158,6 +158,7 @@ export function createRenderer(options: any) {
         // 继续 patch，可能 children 中有变化
         patch(n1, n2, container, parentComponent, anchor);
       } else {
+        // 如果遇到不同的两个节点，循环停止
         break;
       }
 
@@ -172,6 +173,7 @@ export function createRenderer(options: any) {
       if (isSameVnodeType(n1, n2)) {
         patch(n1, n2, container, parentComponent, anchor);
       } else {
+        // 如果遇到不同的两个节点，循环停止
         break;
       }
 
@@ -249,15 +251,17 @@ export function createRenderer(options: any) {
         // key 的重要性，优化性能
         if (prevChild.key !== null) {
           newIndex = keyToNewIndexMap.get(prevChild.key);
-        } else {
-          // 没有 key，遍历查找
-          for (let j = s2; j <= e2; j++) {
-            if (isSameVnodeType(prevChild, c2[j])) {
-              newIndex = j;
-              break;
-            }
-          }
         }
+        // 这段代码没有意义，没有 Key 的话，遍历也找不到一样的。
+        // else {
+        //   // 没有 key，遍历查找
+        //   for (let j = s2; j <= e2; j++) {
+        //     if (isSameVnodeType(prevChild, c2[j])) {
+        //       newIndex = j;
+        //       break;
+        //     }
+        //   }
+        // }
 
         // prevChild 在 c2 中不存在 -> 删除老节点
         if (newIndex === undefined) {
@@ -284,6 +288,7 @@ export function createRenderer(options: any) {
 
       /* 围绕稳定序列，新节点的创建 和 老节点的移动 */
       // 求出最长递增子序列（稳定序列），返回 indexToOldIndexMap 中的递增元素的 index。比如：[5,2,4] -> [1,2]
+      // 目的：减少老节点的移动操作（如果顺序没变，不需要移动）
       const increasingNewIndexSequence = moved
         ? getSequence(indexToOldIndexMap)
         : [];
@@ -291,7 +296,7 @@ export function createRenderer(options: any) {
       // 遍历是倒序的，所以最长递增子序列也是从最后一位开始取的
       let j = increasingNewIndexSequence.length - 1;
 
-      // 倒序处理，确保插入前的元素位置都是稳定的。
+      // 倒序处理，确保插入前的元素位置都是稳定的（因为插入方法为 insertBefore）。
       for (let i = toBePatch - 1; i >= 0; i--) {
         const nextIndex = i + s2;
         const nextChild = c2[nextIndex];
@@ -303,7 +308,6 @@ export function createRenderer(options: any) {
           patch(null, nextChild, container, parentComponent, anchor);
         } else if (moved) {
           // 稳定序列已经排完 或 位置 i 不是稳定序列中第 j 位的 位置 index -> 移动
-          // 因为遍历是倒序的，所以最长递增子序列也是从最后一位开始取的
           if (j < 0 || i !== increasingNewIndexSequence[j]) {
             // 移动老节点，dom 层面的移动
             hostInsert(nextChild.el, container, anchor);
@@ -353,7 +357,7 @@ export function createRenderer(options: any) {
     vnode: any,
     container: any,
     parentComponent: any,
-    anchor: any,
+    anchor: any
   ) {
     const { type, props, children, shapeFlag } = vnode;
 
@@ -379,7 +383,7 @@ export function createRenderer(options: any) {
     children: any,
     container: any,
     parentComponent: any,
-    anchor: any,
+    anchor: any
   ) {
     children.forEach((v: any) => {
       if (isObject(v)) {
@@ -394,7 +398,7 @@ export function createRenderer(options: any) {
     n2: any,
     container: any,
     parentComponent: any,
-    anchor: any,
+    anchor: any
   ) {
     if (!n1) {
       console.log("初始化 component");
@@ -421,12 +425,12 @@ export function createRenderer(options: any) {
     initialVNode: any,
     container: any,
     parentComponent: any,
-    anchor: any,
+    anchor: any
   ) {
     // 创建组件 instance，把 instance 挂载到 vnode 上，component 更新逻辑要用
     const instance = (initialVNode.component = createComponentInstance(
       initialVNode,
-      parentComponent,
+      parentComponent
     ));
 
     // 初始化 setup 数据
@@ -440,7 +444,7 @@ export function createRenderer(options: any) {
     instance: any,
     initialVNode: any,
     container: any,
-    anchor: any,
+    anchor: any
   ) {
     instance.update = effect(
       () => {
@@ -450,7 +454,7 @@ export function createRenderer(options: any) {
           // vnode -> patch，和 createApp mount 的处理一样
           const subTree = (instance.subTree = instance.render.call(
             proxy,
-            proxy,
+            proxy
           ));
           patch(null, subTree, container, instance, anchor);
 
@@ -478,8 +482,8 @@ export function createRenderer(options: any) {
         scheduler() {
           console.log("update scheduler");
           queueJobs(instance.update);
-        },
-      },
+        }
+      }
     );
 
     // 对照 createComponentInstance，把与 vnode 更新相关的属性更新
@@ -491,6 +495,6 @@ export function createRenderer(options: any) {
   }
 
   return {
-    createApp: createAppApi(render),
+    createApp: createAppApi(render)
   };
 }

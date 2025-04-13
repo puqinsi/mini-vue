@@ -9,6 +9,7 @@ class RefImpl {
   _v_isRef: boolean;
   constructor(value: any) {
     this._rawValue = value;
+    // 转换对象类型的数据
     this._value = convert(value);
     this.dep = new Set();
     this._v_isRef = true;
@@ -62,6 +63,6 @@ export function proxyRefs(objectWidthRefs: any) {
       } else {
         return Reflect.set(target, key, value);
       }
-    },
+    }
   });
 }
